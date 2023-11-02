@@ -1,5 +1,6 @@
 import categoryrouter from "./Module/Category/Category.router.js"
 import productrouter from "./Module/Product/Product.router.js"
+import authrouter from "./Module/Auth/Auth.router.js"
 import conn from "../DB/Connection.js"
 
 
@@ -12,6 +13,7 @@ const initapp = (app,express)=>{
 })
   app.use("/category",categoryrouter)
   app.use("/product",productrouter)
+  app.use("/auth",authrouter)
   app.use("/*",(req,res)=>{
     return res.json({message:" Pagee Not Found"})
   })

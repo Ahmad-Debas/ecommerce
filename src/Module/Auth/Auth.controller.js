@@ -3,10 +3,12 @@ import { comparePassword, hashpass } from "../../Serveices/HashandCompare.js"
 import cloudinary from "../../Serveices/Cloudinary.js"
 import { sendEmail } from "../../Serveices/nodemailer.js"
 import { generateToken, verifytoken } from "../../Serveices/generateAndVerifyToken.js"
+import { nanoid , customAlphabet } from "nanoid"
 
 
 
 export const signup = async (req,res,next)=>{
+    
      const {userName , email , password} = req.body
     const user = await userModel.findOne({email})
     if(user){
@@ -15,7 +17,7 @@ export const signup = async (req,res,next)=>{
     const passhash = hashpass(password)
     const token = generateToken({email})
     const {secure_url,public_id} = await cloudinary.uploader.upload(req.file.path,{folder:`${process.env.Signunp_folder}/profile`})
-    const link = `${req.protocol}://localhost:3000/auth/confirmEmail/${token}`
+    const link = `${req.protocol}://${req.headers.host}/auth/confirmEmail/${token}`
     const html = `<a href="${link}" > Confirm Email  </a>`
     let subject = "Plese Confirm your Email"
      await sendEmail(email,subject,html)
@@ -27,11 +29,14 @@ export const login = async (req,res,next)=>{
     const {email,password} = req.body
     const user= await userModel.findOne({email})
     if(!user){
-        return res.status(400).json({message:"Invalid data"})
+        return res.status(404).json({message:"Invalid data"})
     }
     const com = comparePassword(password,user.password)
    if(!com){
     return res.json({message:"Invalid Data"})
+   }
+   if(user.confirmEmail==false){
+    return res.status(400).json({message:"Please confirm your email "})
    }
    const token = generateToken({id:user._id,role:user.role,status:user.status},process.env.LOGIN_SIGNTURE)
    const refrehtoken = generateToken({id:user._id,role:user.role,status:user.status},process.env.LOGIN_SIGNTURE,60*60*24*30)
@@ -55,4 +60,40 @@ export const confirmEmail = async (req,res)=>{
    return res.json({message:"not found user"})
    
 
+}
+
+export const sendCode= async (req,res,next)=>{
+    const {email}= req.body
+   let code  =  customAlphabet("123456789ABCZ",3)
+     code = code()
+   const user = await userModel.findOneAndUpdate({email},{sendCode:code},{new:true})
+   if(!user){
+    return res.status(404).json({message:"Not found email"})
+   }
+   const html = `<h2 >Code id ${code}</h2>`
+   await sendEmail(email,"Reset Password ",html)
+   
+   return res.status(201).json({message:"Success"})
+
+} 
+
+export const forgetPassword = async (req,res,next)=>{
+    const {email, password, code} = req.body
+    const user = await userModel.findOne({email})
+    if(!user){
+        return res.status(400).json({message:"User not regesterd"})
+    }
+    if(code!=user.sendCode){
+        return res.json({message:"not correct code "})
+    }
+    //let match= comparePassword(password,user.password)
+    if(comparePassword(password,user.password)){
+        return res.json({message:" same Password  "})
+    }
+     let newpassword = hashpass(password,parseInt(process.env.SALAT_ROUND))
+     user.password=newpassword
+     user.sendCode=null
+     await user.save()
+     return res.status(200).json({message:"Success"})
+     
 }

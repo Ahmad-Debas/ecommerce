@@ -24,14 +24,28 @@ const categorySchema = new Schema({
     },
     createdBy:{
         type:Types.ObjectId,
-        ref:"User"
+        ref:"User",
+        required:true
     },
     updatedBy:{
         type:Types.ObjectId,
-        ref:"User"
+        ref:"User",
+        required:true
     }
    
-},{timestamps:true})
+},{timestamps:true,
+    toJSON:{virtuals:true},
+    toObject:{virtuals:true}
+    
+})
+
+
+categorySchema.virtual("subCategory",{
+    localField:"_id",
+    foreignField:"categoryId",
+    ref:"Subcategory"
+
+})
 
 const CategoryModel = mongoose.models.Category || model("Category",categorySchema)
 

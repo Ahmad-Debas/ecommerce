@@ -4,8 +4,13 @@ import slugify from "slugify"
 
 
 export const createCategory= async (req,res,next)=>{
+
+    try   {
+        if(!req.file){
+            return res.status(400).json({message:"Can not found file"})
+          }
     
-    const name  =req.body.name.toLowerCase()
+        const name  =req.body.name.toLowerCase()
     const category = await CategoryModel.findOne({name})
     if(category){
         return res.status(409).json({message:"Category is Already exist "})
@@ -13,13 +18,19 @@ export const createCategory= async (req,res,next)=>{
     const slug = slugify(name)
    
     const {secure_url,public_id} = await cloudinary.uploader.upload(req.file.path,{folder:`${process.env.FOLDER_NAME}/categ`})
-   const cat =  await CategoryModel.create({name,slug,image:{secure_url,public_id}})
+    
+   const cat =  await CategoryModel.create({name,slug,image:{secure_url,public_id},createdBy:req.user._id,updatedBy:req.user._id})
    return res.status(201).json({message:"Successfuly Created Category ",cat})
+
+    }catch(err){
+         return res.json({message:"err",err:err.stack})
+    }
 
 }
 
 export const getCategory = async (req,res,next)=>{
-    const category = await CategoryModel.find({})
+  
+    const category = await CategoryModel.find({}).populate("subCategory")
     return res.status(200).json({message:"Success",category})
 }
 export const getActiveCategory = async( req,res,next)=>{
@@ -62,6 +73,7 @@ export const updateCategory = async(req,res,next)=>{
     if(req.body.status){
         cate.status= req.body.status
     }
+      cate.updatedBy= req.user._id
       await cate.save()
       return res.status(201).json({message:"Success",cate})
     }

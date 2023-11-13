@@ -6,7 +6,7 @@ export const generateToken = (info , signture= process.env.SIGNTRURE_SIGNUP, exp
 
 }
 
-export const  verifytoken = (token,signture=process.env.SIGNTRURE_SIGNUP)=>{
-    const decode = Jwt.verify(token,signture)
+export const  verifytoken =  (token,signture=process.env.SIGNTRURE_SIGNUP)=>{
+    const decode =  Jwt.verify(token,signture)
     return decode
 }

@@ -8,20 +8,22 @@ import { nanoid , customAlphabet } from "nanoid"
 
 
 export const signup = async (req,res,next)=>{
-    
-     const {userName , email , password} = req.body
+
+    const {userName , email , password , address, phone} = req.body
     const user = await userModel.findOne({email})
+    
     if(user){
-        return res.status(400).json({message:"email is exist "})
+        //return res.status(400).json({message:"email is exist "})
+        return next(new Error("email is already exist",{cause:409}))
     }
     const passhash = hashpass(password)
     const token = generateToken({email})
-    const {secure_url,public_id} = await cloudinary.uploader.upload(req.file.path,{folder:`${process.env.Signunp_folder}/profile`})
+    const {secure_url,public_id} = await cloudinary.uploader.upload(req.file.path,{folder:`${process.env.FOLDER_NAME}/SignupImage`})
     const link = `${req.protocol}://${req.headers.host}/auth/confirmEmail/${token}`
     const html = `<a href="${link}" > Confirm Email  </a>`
     let subject = "Plese Confirm your Email"
      await sendEmail(email,subject,html)
-    const userr = await userModel.create({userName,email,password:passhash,image:{secure_url,public_id}})
+    const userr = await userModel.create({userName,email,password:passhash,image:{secure_url,public_id},address,phone})
     return res.status(201).json({message:"Success",user:userr._id})
 
 }
@@ -93,7 +95,16 @@ export const forgetPassword = async (req,res,next)=>{
      let newpassword = hashpass(password,parseInt(process.env.SALAT_ROUND))
      user.password=newpassword
      user.sendCode=null
+     user.changPasswordTime= Date.now()
+
+     
+     
      await user.save()
      return res.status(200).json({message:"Success"})
      
+}
+export const deleteInvvalidConfirm = async (req,res,next)=>{
+
+ const user = await userModel.deleteMany({confirmEmail:false})
+ return res.status(200).json({message:"Success"})
 }

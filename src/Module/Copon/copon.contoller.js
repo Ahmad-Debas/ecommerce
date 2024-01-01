@@ -2,7 +2,10 @@ import coponmodel from "../../../DB/model/copon.model.js"
 
 export const createCoupon = async (req,res,next)=>{
 
-    const {name,amount} = req.body
+    const {name} = req.body
+    req.body.expireDate = new Date(req.body.expireDate)
+   
+    
     if(await coponmodel.findOne({name})){
         return res.status(409).json({message:`Copon name ${name} is exsit`})
     }

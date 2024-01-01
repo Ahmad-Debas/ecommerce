@@ -2,14 +2,13 @@ import multer from "multer";
 
 export const fileValidation = {
     image:["image/png",'image/jpeg',"image/webp"],
-    pdf:["application/pdf"]
+    pdf:["application/pdf"],
+    excel:["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]
 
 }
 
 
   function fileUploade(customValidation = []){
-
-
 
     const storage = multer.diskStorage({})
     function fileFilter (req,file,cb){
@@ -22,7 +21,8 @@ export const fileValidation = {
     }
     const upload= multer({fileFilter,storage})
     return upload
-
+ 
+    
 
 
 } 

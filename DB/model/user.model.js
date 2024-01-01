@@ -21,6 +21,7 @@ const userSchema = new Schema({
     },
     image:{
         type:Object,
+        
     },
     gender:{
         type:String,
@@ -49,9 +50,20 @@ const userSchema = new Schema({
     sendCode:{
         type:String,
         default:null
+    },
+    changPasswordTime:{
+        type:Date
+    },
+    online:{
+        type:Boolean,
+        default:false,
     }
+    
 },{timestamps:true})
 
 const userModel = mongoose.models.User || model("User",userSchema)
 
 export default userModel
+
+
+

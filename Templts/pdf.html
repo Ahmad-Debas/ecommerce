@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <p>Ahmadd ali debas</p>
+
+        <table border="1">
+            {{#each user}}
+            <tr>
+                <td> id:{{this._id}} </td>
+                <td> Name: {{this.userName}} </td>
+                <td> email: {{this.email}} </td>
+            </tr>
+            
+            {{/each}}
+        </table>
+       
+    </body>
+</html>

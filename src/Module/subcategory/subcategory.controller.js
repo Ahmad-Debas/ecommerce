@@ -35,13 +35,16 @@ export const createSubCategory = async (req,res,next)=>{
 export const getSubcategory = async (req,res,next) =>{
     const categoryId = req.params.id
     
-      const cat = await CategoryModel.findById(categoryId)
-      if(!cat){
-        return res.status(404).json({message:"Category not founddd "})
-      }
-      const subcategory = await submodel.find({categoryId}).populate({
+    const cat = await CategoryModel.findById(categoryId)
+    if(!cat){
+      return res.status(404).json({message:"Category not founddd "})
+    } 
+    const subcategory = await submodel.find({categoryId}).populate({
         path:"categoryId"
-      })
+    }).populate({
+      path:"Product"
+    })
+   
       return res.status(200).json({message:"Success",subcategory})
     
 }

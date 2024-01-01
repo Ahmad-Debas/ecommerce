@@ -15,8 +15,7 @@ const CoponSchema = new Schema({
     },
     usedBy:[{type:Types.ObjectId,ref:"User"}],
     expireDate:{
-        type:Date,
-
+        type:Date,required:true
     },
     isDeleted:{
       type:Boolean,
